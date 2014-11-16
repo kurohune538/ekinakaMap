@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>851A9AEF-1122-442C-9168-01F3A0DFA039</string>
+	<key>IDESourceControlProjectName</key>
+	<string>EkiNaka</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>280E207746DE0CC4F39D9B035668C63D62AC508B</key>
+		<string>https://bitbucket.org/ekinakamap/ekinakamap.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>EkinakaMAP/EkiNaka.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>280E207746DE0CC4F39D9B035668C63D62AC508B</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://bitbucket.org/ekinakamap/ekinakamap.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>280E207746DE0CC4F39D9B035668C63D62AC508B</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>280E207746DE0CC4F39D9B035668C63D62AC508B</string>
+			<key>IDESourceControlWCCName</key>
+			<string>EkinakaMAP_git</string>
+		</dict>
+	</array>
+</dict>
+</plist>
