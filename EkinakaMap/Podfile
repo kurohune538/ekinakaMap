@@ -1,0 +1,2 @@
+platform :ios, "8.1"
+pod 'DDPageControl', '~> 0.1.0'
