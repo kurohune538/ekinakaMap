@@ -5,7 +5,6 @@
 //  Created by 佐野 大河 on 2014/06/04.
 //  Copyright (c) 2014年 佐野 大河. All rights reserved.
 //
-
 #import <UIKit/UIKit.h>
 #import <CoreMotion/CoreMotion.h>
 #import <CoreLocation/CoreLocation.h>
@@ -19,16 +18,12 @@
 //　加速度センサの感度を制限する
 #define kFilteringFactor 0.7f
 
-
-
 @interface ARViewController : UIViewController<CLLocationManagerDelegate,YMKMapViewDelegate> {
     CLLocationManager *locationManager;
     NSString *station;
-
 }
 
 - (void)loadStationLocation:(NSString *)stationName;
-
 @property (nonatomic,copy) NSString *station;
 
 @end

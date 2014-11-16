@@ -10,31 +10,31 @@
 	<string>EkiNaka</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>280E207746DE0CC4F39D9B035668C63D62AC508B</key>
-		<string>https://bitbucket.org/ekinakamap/ekinakamap.git</string>
+		<key>826E287114ABFA8223D15E7AB6B1751BDFA08435</key>
+		<string>https://github.com/kurohune538/ekinakaMap.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>EkinakaMAP/EkiNaka.xcworkspace</string>
+	<string>EkinakaMap/EkiNaka.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>280E207746DE0CC4F39D9B035668C63D62AC508B</key>
+		<key>826E287114ABFA8223D15E7AB6B1751BDFA08435</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://bitbucket.org/ekinakamap/ekinakamap.git</string>
+	<string>https://github.com/kurohune538/ekinakaMap.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>280E207746DE0CC4F39D9B035668C63D62AC508B</string>
+	<string>826E287114ABFA8223D15E7AB6B1751BDFA08435</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>280E207746DE0CC4F39D9B035668C63D62AC508B</string>
+			<string>826E287114ABFA8223D15E7AB6B1751BDFA08435</string>
 			<key>IDESourceControlWCCName</key>
-			<string>EkinakaMAP_git</string>
+			<string>ekinakaMap_github</string>
 		</dict>
 	</array>
 </dict>

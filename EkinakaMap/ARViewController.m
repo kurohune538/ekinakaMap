@@ -5,8 +5,7 @@
 //  Created by 佐野 大河 on 2014/06/04.
 //  Copyright (c) 2014年 佐野 大河. All rights reserved.
 //
-//テスト
-
+//
 #import "ARViewController.h"
 
 @interface ARViewController ()
@@ -17,7 +16,6 @@
 @property (strong, nonatomic) UIView *previewView;
 @end
 
-
 @implementation ARViewController{
     //各軸座標の値
     UIAccelerationValue accelX, accelY, accelZ;
@@ -25,14 +23,11 @@
     CMMotionManager *motionManager;
     
     CLLocationDirection heading;
-    
     //画像を表示するViewのインスタンスを作成
     UIImageView *markerView[500];
     //画像自体のインスタンス
     UIImage *markerImage;
     //画面取得
-    
-    
     UIScreen *sc;
     UILabel *headingLabel;
     UILabel *degreeLabel;
@@ -46,17 +41,13 @@
     NSString *markerDistanceStr[500];
     double markerDisDouble[500];
     
-    //追加
     //地図を隠すボタン
     UIImage *downBtnImg;
     UIImage *upBtnImg;
     UIButton *downBtn;
     UIButton *upBtn;
-    
     YMKMapView *ymap;
     
-
-
     float sizeX;
     float sizeY;
     float markerX;
@@ -76,32 +67,26 @@
     //ユーザーが決めた表示範囲
     int userLength;
     
-    
     CLLocationDistance distance;
 	
     //スカイツリーの座標
-#define latSKY 35.710063
-#define lonSKY 139.8107
+    #define latSKY 35.710063
+    #define lonSKY 139.8107
     
     //画面読み込み時に現在地へ飛ぶかどうか
     BOOL loadNowLocation;
-    
     //現在地移動ボタン
     UIButton *nowPlaceBtn;
     //地下街表示ボタン
     UIButton *undergroundBtn;
-    
     //アイコンの高さの調整用
     int iconAdjustHeight;
-    
     //地下街の表示
     BOOL chikaOrNot;
-    
     //csvファイルから取得した全出口と緯度経度データ
     NSMutableArray *latLonData;
     //緯度経度データの数
     int allDataCount;
-    
     NSUserDefaults *ud;
 }
 
@@ -130,10 +115,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
-    
     ud = [NSUserDefaults standardUserDefaults];
-    
     // CSVファイルからセクションデータを取得する
     NSString *csvFile = [[NSBundle mainBundle] pathForResource:@"ExitLatLonData" ofType:@"csv"];
     NSData *csvData = [NSData dataWithContentsOfFile:csvFile];
@@ -179,28 +161,21 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     }
 //    NSLog(@"csv:%@",latLonData);
     
-    
-
-
     //画面サイズの取得
     CGFloat width  = self.view.frame.size.width;
     CGFloat height = self.view.frame.size.height;
-    
     
     // プレビュー用のビューを生成
     self.previewView = [[UIView alloc] initWithFrame:CGRectMake(0,0,width,height)];
     [self.view addSubview:self.previewView];
     
-    // 撮影開始
     [self setupAVCapture];
-    
     //デバイスの画面のサイズを取得
     sc = [UIScreen mainScreen];
     //ステータスバー込みのサイズ
     CGRect rect = sc.bounds;
     sizeX = rect.size.width;
     sizeY = rect.size.height;
-    
     //画像を選択
     markerImage = [UIImage imageNamed:@"balloon300-150.png"];
     //データの数を取得
@@ -209,7 +184,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     for (int i = 0; i < allDataCount; i++) {
         //サイズ調整用
         float adjust = 0.8;
-        //画像初期化
         markerView[i] = [[UIImageView alloc]initWithImage:markerImage];
         //画面の外に配置
         markerView[i].frame = CGRectMake(width, height, 150*adjust, 75*adjust);
@@ -220,7 +194,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         markerView[i].hidden = YES;
         //画像Viewを追加
         [self.view addSubview:markerView[i]];
-        
         //距離のラベルを作成
         markerDistance[i] = [[UILabel alloc] initWithFrame:CGRectMake(0,0,75*adjust,15)];
         markerDistance[i].center = CGPointMake(75*adjust, 38);
@@ -238,7 +211,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         [markerView[i] addSubview:markerName[i]];
     }
     
-
     //YMKMapViewのインスタンスを作成
     ymap = [[YMKMapView alloc] initWithFrame:CGRectMake(0, height/2, width, height/2-49) appid:@"dj0zaiZpPWowMElEclpUZU5yNyZzPWNvbnN1bWVyc2VjcmV0Jng9NGY-" ];
     
@@ -246,22 +218,14 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 //    ymap.mapType=YMKMapTypeStyle; //スタンダード
 //    ymap.mapType=YMKMapTypeHybrid; //地下街を表示
     
-    
     NSMutableArray* ary=[NSMutableArray array];
     [ary addObject:[NSString stringWithFormat:@"on:background"]]; //←なぜ機能してくれない！
     [ymap setMapType:YMKMapTypeStyle MapStyle:@"standard" MapStyleParam:ary];
-    
-    
-    //YMKMapViewを追加
     [self.view addSubview:ymap];
-    
     //YMKMapViewDelegateを登録
     ymap.delegate = self;
-    
-    
     //現在地の表示
     ymap.showsUserLocation = YES;
-    
     //ヘッダー画像
     UIImageView *headView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, 20)];
     headView.image = [UIImage imageNamed:@"640-98.png"];
@@ -278,10 +242,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     // ボタンがタッチダウンされた時にhogeメソッドを呼び出す
     [downBtn addTarget:self action:@selector(downbtnTapped:)
       forControlEvents:UIControlEventTouchUpInside];
-    //ボタンを表示
     [self.view addSubview:downBtn];
-    
-    
     //現在地取得ボタン
     nowPlaceBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     UIImage *nowPlaceImg = [UIImage imageNamed:@"nowLocation.png"];
@@ -300,17 +261,11 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     undergroundBtn.alpha = 0.5;
     [ymap addSubview:undergroundBtn];
     
-    
     //アイコンの高さの調整用
     iconAdjustHeight = 2;
-    
     //地下街の表示
     chikaOrNot = NO;
-    
     [self setAnnotation];
-    
-    
-    
    }
 
 //ビューが読み込まれるたびに呼ばれる
@@ -319,17 +274,14 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 //    NSLog(@"緯度:%f 経度:%f",nowLatitude,nowLongitude);
     //　加速度センサを開始する
     [self startAccelerometer];
-    
     ud = [NSUserDefaults standardUserDefaults];
-    
+
     // コンパスが使用可能かどうかチェックする
     if ([CLLocationManager headingAvailable]) {
         // CLLocationManagerを作る
-//        locationManager = [[CLLocationManager alloc] init];
         locationManager = [CLLocationManager new];
         //デリゲートを設定
         locationManager.delegate = self;
-        
         // iOS8未満は、このメソッドは無いので
         if ([locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
             
@@ -337,13 +289,10 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
             // 「このアプリ使っていない時も取得するけどいいでしょ？」
             [locationManager requestAlwaysAuthorization];
         }
-        
         // デバイスの度の向きを北とするか（デフォルトは画面上部）
         locationManager.headingOrientation = CLDeviceOrientationPortrait;
-        
         // コンパスの使用を開始する
         [locationManager startUpdatingHeading];
-        
         // 測量の制度を「出来る限り正確」に設定
         [locationManager setDesiredAccuracy:kCLLocationAccuracyBest];
         [locationManager setDistanceFilter:kCLDistanceFilterNone];
@@ -380,8 +329,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     }
 
 }
-
-
 
 //駅の位置へ移動
 - (void)loadStationLocation:(NSString *)stationName{
@@ -447,7 +394,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     CALayer *previewLayer = self.previewView.layer;
     previewLayer.masksToBounds = YES;
     [previewLayer addSublayer:captureVideoPreviewLayer];
-    
     // セッション開始
     [self.session startRunning];
 }
@@ -456,11 +402,9 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 {
     // ビデオ入力のAVCaptureConnectionを取得
     AVCaptureConnection *videoConnection = [self.stillImageOutput connectionWithMediaType:AVMediaTypeVideo];
-    
     if (videoConnection == nil) {
         return;
     }
-    
     // ビデオ入力から画像を非同期で取得。ブロックで定義されている処理が呼び出され、画像データを引数から取得する
     [self.stillImageOutput
      captureStillImageAsynchronouslyFromConnection:videoConnection
@@ -468,22 +412,16 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
          if (imageDataSampleBuffer == NULL) {
              return;
          }
-         
          // 入力された画像データからJPEGフォーマットとしてデータを取得
          NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-         
-         // JPEGデータからUIImageを作成
          UIImage *image = [[UIImage alloc] initWithData:imageData];
-         
          // アルバムに画像を保存
          UIImageWriteToSavedPhotosAlbum(image, self, nil, nil);
      }];
 }
 
-
 //　加速度センサを開始するメソッド
 -(void)startAccelerometer {
-    //　加速度センサを利用するために読み込む
     motionManager = [[CMMotionManager alloc] init];
     //　加速度センサを読み込む間隔を設定
     motionManager.accelerometerUpdateInterval = (1.0f / kAccelerometerFrequency);
@@ -514,7 +452,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     nowLongitude = newLocation.coordinate.longitude;
     
 //    NSLog(@"緯度:%f 経度:%f",nowLatitude,nowLongitude);
-    
     //全てのマーカーとの距離を計算
     for (int i = 0; i < allDataCount; i++) {
         // 経緯緯度からCLLocationを作成
@@ -525,7 +462,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         float markerLon = [[[latLonData objectAtIndex:i] objectAtIndex:2] floatValue];
         
         CLLocation *targetLocation = [[CLLocation alloc] initWithLatitude:markerLat longitude:markerLon];
-        
         //　距離を取得
         distance = [nowLocation distanceFromLocation:targetLocation];
         
@@ -535,7 +471,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         markerDisDouble[i] = distance;
         
         //NSLog(@"きょり%d%f",i,markerDisDouble[i]);
-        
         //一定距離以内のマーカーを表示
         if (distance < userLength) {
             markerView[i].hidden = NO;
@@ -548,10 +483,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         }else{
             markerDistance[i].text = [NSString stringWithFormat:@"%.0f m",distance];
         }
-
-     
     }
-    
     //タブバーから読み込まれた場合、一度だけ現在地に移動する
     if (loadNowLocation == true) {
         [self setNowPlace];
@@ -590,9 +522,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 //デバイスの方位が変化すると、デリゲートメソッドであるlocationManager:didUpdateHeading:が呼び出される
 - (void)locationManager:(CLLocationManager*)manager didUpdateHeading:(CLHeading*)newHeading
 {
-    
     heading = newHeading.trueHeading;
-    
     //全てのマーカーの方位角を求める
     for (int i = 0; i < allDataCount; i++) {
         //データからそれぞれの緯度経度を取得し、nsstring→floatに変換
@@ -621,18 +551,12 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 //                
 //            }
 //        }
-        
-                //マーカーの位置を調整
+        //マーカーの位置を調整
         [self drawPicture:i];
     }
-    
     for (int i=0; i<allDataCount; i++) {
-    
     //NSLog(@"出口%@はきょり%dは%f",markerName[i].text,i,markerDisDouble[i]);
     }
-    
-    
-    
     headingLabel.text = [NSString stringWithFormat:@"%.2f", heading];
     [self.view addSubview:headingLabel];
     
@@ -651,15 +575,9 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 //画像の位置を変える
 -(void)drawPicture:(int)markerNumber{
     
-    
     //最後の要素をのぞいて、すべての要素を並べ替える
             //NSLog(@"%@",markerDistanceData);
-    
-    
-    
     /*約0~400mの距離のマーカーが画面いっぱいに入る調整*/
-    
-    
         if (targetAzimuth>180 && targetAzimuth<360) {
            
             markerView[markerNumber].center = CGPointMake(sizeX/2.0 - (targetAzimuth-360.0)*10.9,
@@ -694,9 +612,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 -(void)downbtnTapped:(id)sender{
     
     NSLog(@"sita");
-    
-    
-    
     [downBtn setBackgroundImage:upBtnImg forState:UIControlStateNormal];
     
     [self.view addSubview:downBtn];
@@ -715,8 +630,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
                          // アニメーション終了時
                          NSLog(@"アニメーション終了");
                      }];
-    
-    
     // ボタンがタッチダウンされた時にupbtnTappedメソッドを呼び出す
     [downBtn addTarget:self action:@selector(upbtnTapped:)
       forControlEvents:UIControlEventTouchUpInside];
@@ -746,8 +659,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
                          // アニメーション終了時
                          NSLog(@"アニメーション終了");
                      }];
-    
-    
     // ボタンがタッチダウンされた時にdownbtnTappedメソッドを呼び出す
     [downBtn addTarget:self action:@selector(downbtnTapped:)
       forControlEvents:UIControlEventTouchUpInside];
@@ -762,18 +673,5 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-/*
- #pragma mark - Navigation
- 
- // In a storyboard-based application, you will often want to do a little preparation before navigation
- - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
- {
- // Get the new view controller using [segue destinationViewController].
- // Pass the selected object to the new view controller.
- }
- */
-
-//!!!!!!!!!!!!!!!!!!!
 
 @end
