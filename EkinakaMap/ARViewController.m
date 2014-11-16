@@ -22,9 +22,8 @@
     CMMotionManager *motionManager;
     
     CLLocationDirection heading;
-    //画像を表示するViewのインスタンスを作成
     UIImageView *markerView[500];
-    //画像自体のインスタンス
+
     UIImage *markerImage;
 
     UIScreen *sc;
@@ -46,7 +45,6 @@
     UIButton *downBtn;
     UIButton *upBtn;
     YMKMapView *ymap;
-    
     float sizeX;
     float sizeY;
     float markerX;
@@ -65,18 +63,16 @@
 	double leftAzimuth;
     //ユーザーが決めた表示範囲
     int userLength;
-    
+
     CLLocationDistance distance;
-	
     //スカイツリーの座標
     #define latSKY 35.710063
     #define lonSKY 139.8107
     
     //画面読み込み時に現在地へ飛ぶかどうか
     BOOL loadNowLocation;
-    //現在地移動ボタン
+
     UIButton *nowPlaceBtn;
-    //地下街表示ボタン
     UIButton *undergroundBtn;
     //アイコンの高さの調整用
     int iconAdjustHeight;
@@ -167,7 +163,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [self.view addSubview:self.previewView];
     
     [self setupAVCapture];
-    
+
     sc = [UIScreen mainScreen];
     //ステータスバー込みのサイズ
     CGRect rect = sc.bounds;
@@ -220,6 +216,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [ymap setMapType:YMKMapTypeStyle MapStyle:@"standard" MapStyleParam:ary];
     [self.view addSubview:ymap];
     //YMKMapViewDelegateを登録
+
     ymap.delegate = self;
     ymap.showsUserLocation = YES;
     //ヘッダー画像
@@ -236,6 +233,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [downBtn addTarget:self action:@selector(downbtnTapped:)
       forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:downBtn];
+
     //現在地取得ボタン
     nowPlaceBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     UIImage *nowPlaceImg = [UIImage imageNamed:@"nowLocation.png"];
@@ -246,8 +244,8 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     
     //地下街ボタン
     undergroundBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-        UIImage *undergroundImg = [UIImage imageNamed:@"underGround.png"];
-        [undergroundBtn setBackgroundImage:undergroundImg forState:UIControlStateNormal];
+    UIImage *undergroundImg = [UIImage imageNamed:@"underGround.png"];
+    [undergroundBtn setBackgroundImage:undergroundImg forState:UIControlStateNormal];
     undergroundBtn.frame = CGRectMake(280, ymap.frame.size.height - 90, 68/2, 68/2);
     [undergroundBtn addTarget:self action:@selector(changeMapTypeToChika) forControlEvents:UIControlEventTouchUpInside];
     //undergroundBtn.backgroundColor = [UIColor redColor];
@@ -533,12 +531,14 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 //                
 //            }
 //        }
+
         //マーカーの位置を調整
         [self drawPicture:i];
     }
     for (int i=0; i<allDataCount; i++) {
     //NSLog(@"出口%@はきょり%dは%f",markerName[i].text,i,markerDisDouble[i]);
     }
+
     headingLabel.text = [NSString stringWithFormat:@"%.2f", heading];
     [self.view addSubview:headingLabel];
     
@@ -559,6 +559,9 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     
     //最後の要素をのぞいて、すべての要素を並べ替える
             //NSLog(@"%@",markerDistanceData);
+    //最後の要素をのぞいて、すべての要素を並べ替える
+            //NSLog(@"%@",markerDistanceData);
+
     /*約0~400mの距離のマーカーが画面いっぱいに入る調整*/
         if (targetAzimuth>180 && targetAzimuth<360) {
            
@@ -595,14 +598,12 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     
     NSLog(@"sita");
     [downBtn setBackgroundImage:upBtnImg forState:UIControlStateNormal];
-    
     [self.view addSubview:downBtn];
-    // アニメーション
     [UIView animateWithDuration:0.3f
                           delay:0.0f
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
-                         
+
                          ymap.transform = CGAffineTransformMakeTranslation(0, sizeY/2);
                          downBtn.transform = CGAffineTransformMakeTranslation(0, sizeY/2-70);
                          
@@ -610,26 +611,21 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
                         
                          NSLog(@"アニメーション終了");
                      }];
-    // ボタンがタッチダウンされた時にupbtnTappedメソッドを呼び出す
+    
     [downBtn addTarget:self action:@selector(upbtnTapped:)
       forControlEvents:UIControlEventTouchUpInside];
-    
     //アイコンの位置の高さを2分の１にする
     iconAdjustHeight = 1;
 }
 
 -(void)upbtnTapped:(id)sender{
-    
     NSLog(@"ue");
-    
     [downBtn setBackgroundImage:downBtnImg forState:UIControlStateNormal];
-    
     [self.view addSubview:downBtn];
     [UIView animateWithDuration:0.3f
                           delay:0.0f
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
-                         
                          ymap.transform = CGAffineTransformMakeTranslation(0, 0);
                          downBtn.transform = CGAffineTransformMakeTranslation(0, 0);
                          
@@ -637,7 +633,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
                          
                          NSLog(@"アニメーション終了");
                      }];
-    // ボタンがタッチダウンされた時にdownbtnTappedメソッドを呼び出す
     [downBtn addTarget:self action:@selector(downbtnTapped:)
       forControlEvents:UIControlEventTouchUpInside];
     

@@ -25,5 +25,4 @@
 
 - (void)loadStationLocation:(NSString *)stationName;
 @property (nonatomic,copy) NSString *station;
-
 @end
