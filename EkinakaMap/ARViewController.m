@@ -19,7 +19,6 @@
 @implementation ARViewController{
     //各軸座標の値
     UIAccelerationValue accelX, accelY, accelZ;
-    // CoreMotionを利用するためのオブジェクト
     CMMotionManager *motionManager;
     
     CLLocationDirection heading;
@@ -27,7 +26,7 @@
     UIImageView *markerView[500];
     //画像自体のインスタンス
     UIImage *markerImage;
-    //画面取得
+
     UIScreen *sc;
     UILabel *headingLabel;
     UILabel *degreeLabel;
@@ -107,7 +106,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
     }
     return self;
 }
@@ -161,7 +159,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     }
 //    NSLog(@"csv:%@",latLonData);
     
-    //画面サイズの取得
     CGFloat width  = self.view.frame.size.width;
     CGFloat height = self.view.frame.size.height;
     
@@ -170,7 +167,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [self.view addSubview:self.previewView];
     
     [self setupAVCapture];
-    //デバイスの画面のサイズを取得
+    
     sc = [UIScreen mainScreen];
     //ステータスバー込みのサイズ
     CGRect rect = sc.bounds;
@@ -187,12 +184,12 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         markerView[i] = [[UIImageView alloc]initWithImage:markerImage];
         //画面の外に配置
         markerView[i].frame = CGRectMake(width, height, 150*adjust, 75*adjust);
-        //表示する画像のサイズを取得
+
         markerX = markerImage.size.width;
         markerY = markerImage.size.height;
         //最初は非表示
         markerView[i].hidden = YES;
-        //画像Viewを追加
+
         [self.view addSubview:markerView[i]];
         //距離のラベルを作成
         markerDistance[i] = [[UILabel alloc] initWithFrame:CGRectMake(0,0,75*adjust,15)];
@@ -224,22 +221,18 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [self.view addSubview:ymap];
     //YMKMapViewDelegateを登録
     ymap.delegate = self;
-    //現在地の表示
     ymap.showsUserLocation = YES;
     //ヘッダー画像
     UIImageView *headView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, 20)];
     headView.image = [UIImage imageNamed:@"640-98.png"];
     [self.view addSubview:headView];
     
-    //ボタンの画像を指定する
     downBtnImg = [UIImage imageNamed:@"pullDownBtn.png"];
     upBtnImg = [UIImage imageNamed:@"pullUpBtn.png"];
-    //ボタンを生成
+
     downBtn = [[UIButton alloc]
                initWithFrame:CGRectMake(8*width/10, height/2-1, 56, 24)];
-    // 画像をセットする
     [downBtn setBackgroundImage:downBtnImg forState:UIControlStateNormal];
-    // ボタンがタッチダウンされた時にhogeメソッドを呼び出す
     [downBtn addTarget:self action:@selector(downbtnTapped:)
       forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:downBtn];
@@ -278,9 +271,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 
     // コンパスが使用可能かどうかチェックする
     if ([CLLocationManager headingAvailable]) {
-        // CLLocationManagerを作る
         locationManager = [CLLocationManager new];
-        //デリゲートを設定
         locationManager.delegate = self;
         // iOS8未満は、このメソッドは無いので
         if ([locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
@@ -321,7 +312,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     BOOL b = [ud boolForKey:@"KEY_C"];
     
     [ud synchronize];
-    //スケールバーの表示
+
     if (b ==YES) {
         ymap.scalebarVisible = YES;
     }else{
@@ -373,10 +364,8 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     
     // 入力と出力からキャプチャーセッションを作成
     self.session = [[AVCaptureSession alloc] init];
-    
     // 正面に配置されているカメラを取得
     AVCaptureDevice *camera = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    
     // カメラからの入力を作成し、セッションに追加
     self.videoInput = [[AVCaptureDeviceInput alloc] initWithDevice:camera error:&error];
     [self.session addInput:self.videoInput];
@@ -394,7 +383,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     CALayer *previewLayer = self.previewView.layer;
     previewLayer.masksToBounds = YES;
     [previewLayer addSublayer:captureVideoPreviewLayer];
-    // セッション開始
     [self.session startRunning];
 }
 
@@ -429,10 +417,8 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     CMAccelerometerHandler acceleHandler = ^(CMAccelerometerData *data, NSError *error) {
         [self didAccelerate:data.acceleration];
     };
-    //　加速度センサを開始する
     [motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue] withHandler:acceleHandler];
 }
-
 
 //　加速度に変化が起こったときに呼ばれるメソッド
 - (void)didAccelerate:(CMAcceleration)acceleratio
@@ -447,7 +433,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 
 //デバイスの緯度と経度が変化すると呼ばれるメソッド
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation{
-    
     nowLatitude = newLocation.coordinate.latitude;
     nowLongitude = newLocation.coordinate.longitude;
     
@@ -518,7 +503,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     }
 }
 
-
 //デバイスの方位が変化すると、デリゲートメソッドであるlocationManager:didUpdateHeading:が呼び出される
 - (void)locationManager:(CLLocationManager*)manager didUpdateHeading:(CLHeading*)newHeading
 {
@@ -530,10 +514,8 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         float markerLon = [[[latLonData objectAtIndex:i] objectAtIndex:2] floatValue];
         // 方位角を求める(現在地から目的地までの方位角)
         pointAzimuth = CalculateAngle(nowLatitude, nowLongitude, markerLat, markerLon);
-        
         //ラジアンを度に変換
         targetDegree = pointAzimuth * 180/M_PI;
-        
         // 現在向いている方位から方位角を引き、今向いている方向から対象物までの角度を算出する
         targetAzimuth = newHeading.trueHeading - targetDegree;
         if (targetAzimuth < 0) {
@@ -616,18 +598,16 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     
     [self.view addSubview:downBtn];
     // アニメーション
-    [UIView animateWithDuration:0.3f // アニメーション速度0.5秒
-                          delay:0.0f // 0秒後にアニメーション
+    [UIView animateWithDuration:0.3f
+                          delay:0.0f
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
-                         // 画像を移動
                          
                          ymap.transform = CGAffineTransformMakeTranslation(0, sizeY/2);
                          downBtn.transform = CGAffineTransformMakeTranslation(0, sizeY/2-70);
                          
-                         
                      } completion:^(BOOL finished) {
-                         // アニメーション終了時
+                        
                          NSLog(@"アニメーション終了");
                      }];
     // ボタンがタッチダウンされた時にupbtnTappedメソッドを呼び出す
@@ -645,18 +625,16 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [downBtn setBackgroundImage:downBtnImg forState:UIControlStateNormal];
     
     [self.view addSubview:downBtn];
-    
-    // アニメーション
-    [UIView animateWithDuration:0.3f // アニメーション速度0.5秒
-                          delay:0.0f // 0秒後にアニメーション
+    [UIView animateWithDuration:0.3f
+                          delay:0.0f
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
-                         // 画像を移動
+                         
                          ymap.transform = CGAffineTransformMakeTranslation(0, 0);
                          downBtn.transform = CGAffineTransformMakeTranslation(0, 0);
                          
                      } completion:^(BOOL finished) {
-                         // アニメーション終了時
+                         
                          NSLog(@"アニメーション終了");
                      }];
     // ボタンがタッチダウンされた時にdownbtnTappedメソッドを呼び出す
@@ -671,7 +649,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 @end
