@@ -17,6 +17,11 @@
 @end
 
 @implementation ARViewController{
+    //緯度経度のcsv読み込み用インスタンス
+    NSString *csvFile;
+    NSData *csvData;
+    NSString *csv;
+    NSScanner *scanner;
     //各軸座標の値
     UIAccelerationValue accelX, accelY, accelZ;
     CMMotionManager *motionManager;
@@ -110,12 +115,7 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 {
     [super viewDidLoad];
     ud = [NSUserDefaults standardUserDefaults];
-    // CSVファイルからセクションデータを取得する
-    NSString *csvFile = [[NSBundle mainBundle] pathForResource:@"ExitLatLonData" ofType:@"csv"];
-    NSData *csvData = [NSData dataWithContentsOfFile:csvFile];
-    NSString *csv = [[NSString alloc] initWithData:csvData encoding:NSUTF8StringEncoding];
-    NSScanner *scanner = [NSScanner scannerWithString:csv];
-    
+    [self getLocationCsv];
     // 改行文字の集合を取得
     NSCharacterSet *chSet = [NSCharacterSet newlineCharacterSet];
     // 一行ずつの読み込み
@@ -216,7 +216,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     [ymap setMapType:YMKMapTypeStyle MapStyle:@"standard" MapStyleParam:ary];
     [self.view addSubview:ymap];
     //YMKMapViewDelegateを登録
-
     ymap.delegate = self;
     ymap.showsUserLocation = YES;
     //ヘッダー画像
@@ -319,6 +318,13 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 
 }
 
+-(void)getLocationCsv{
+    csvFile = [[NSBundle mainBundle] pathForResource:@"ExitLatLonData" ofType:@"csv"];
+    csvData = [NSData dataWithContentsOfFile:csvFile];
+    csv = [[NSString alloc] initWithData:csvData encoding:NSUTF8StringEncoding];
+    scanner = [NSScanner scannerWithString:csv];
+    
+}
 //駅の位置へ移動
 - (void)loadStationLocation:(NSString *)stationName{
     NSLog(@"%@へ移動",stationName);
