@@ -32,6 +32,8 @@
     UIImage *markerImage;
 
     UIScreen *sc;
+    CGFloat width;
+    CGFloat height;
     UILabel *headingLabel;
     UILabel *degreeLabel;
     UILabel *nowLatLabel;
@@ -77,6 +79,7 @@
     //画面読み込み時に現在地へ飛ぶかどうか
     BOOL loadNowLocation;
 
+    BOOL isScaleBar;
     UIButton *nowPlaceBtn;
     UIButton *undergroundBtn;
     //アイコンの高さの調整用
@@ -114,158 +117,50 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    ud = [NSUserDefaults standardUserDefaults];
+    [self setUp];
     [self getLocationCsv];
-    // 改行文字の集合を取得
-    NSCharacterSet *chSet = [NSCharacterSet newlineCharacterSet];
-    // 一行ずつの読み込み
-    NSString *line;
-    latLonData = [[NSMutableArray alloc] init];
-    
-    //タイトル行読み飛ばしフラグ。読み込む場合はtrueにする
-    bool titleUse = false;
-    while (![scanner isAtEnd]) {
-        // 一行読み込み
-        [scanner scanUpToCharactersFromSet:chSet intoString:&line];
-        if(titleUse){
-            // カンマ「,」で区切る
-            NSArray *array = [line componentsSeparatedByString:@","];
-            
-            //テスト(全体の緯度経度を移動)
-//            float fLat = [[array objectAtIndex:1] floatValue];
-//            float fLon = [[array objectAtIndex:2] floatValue];
-////            fLat = fLat - 0.060291; //佐野家と新宿駅の差
-////            fLon = fLon - 0.315887;
-//            fLat = fLat - 0.029355; //日野キャンと新宿駅の差　35.661523　　139.367619　35.690921　　139.700258
-//            fLon = fLon - 0.332639;
-//            NSString *sLat = [NSString stringWithFormat:@"%f",fLat];
-//            NSString *sLon = [NSString stringWithFormat:@"%f",fLon];
-//            NSString *exitName = [array objectAtIndex:0];
-//            NSArray *testArray = [NSArray arrayWithObjects:exitName,sLat,sLon, nil];
-//            //配列に挿入する
-//            [latLonData addObject:testArray];
-            
-            // 配列に挿入する
-            [latLonData addObject:array];
 
-        }
-        //　改行文字をスキップ
-        [scanner scanCharactersFromSet:chSet intoString:NULL];
-        titleUse = true;
-    }
-//    NSLog(@"csv:%@",latLonData);
+    [self prepareScreen];
     
-    CGFloat width  = self.view.frame.size.width;
-    CGFloat height = self.view.frame.size.height;
+    [self setMarker];
     
-    // プレビュー用のビューを生成
-    self.previewView = [[UIView alloc] initWithFrame:CGRectMake(0,0,width,height)];
-    [self.view addSubview:self.previewView];
+    [self setUpYmap];
     
-    [self setupAVCapture];
-
-    sc = [UIScreen mainScreen];
-    //ステータスバー込みのサイズ
-    CGRect rect = sc.bounds;
-    sizeX = rect.size.width;
-    sizeY = rect.size.height;
-    //画像を選択
-    markerImage = [UIImage imageNamed:@"balloon300-150.png"];
-    //データの数を取得
-    allDataCount = [latLonData count];
-    //全てのマーカーをセット
-    for (int i = 0; i < allDataCount; i++) {
-        //サイズ調整用
-        float adjust = 0.8;
-        markerView[i] = [[UIImageView alloc]initWithImage:markerImage];
-        //画面の外に配置
-        markerView[i].frame = CGRectMake(width, height, 150*adjust, 75*adjust);
-
-        markerX = markerImage.size.width;
-        markerY = markerImage.size.height;
-        //最初は非表示
-        markerView[i].hidden = YES;
-
-        [self.view addSubview:markerView[i]];
-        //距離のラベルを作成
-        markerDistance[i] = [[UILabel alloc] initWithFrame:CGRectMake(0,0,75*adjust,15)];
-        markerDistance[i].center = CGPointMake(75*adjust, 38);
-        markerDistance[i].textAlignment = UITextAlignmentCenter;
-        markerDistance[i].font = [UIFont fontWithName:@"AppleGothic" size:12];
-        markerDistance[i].adjustsFontSizeToFitWidth = YES;
-        [markerView[i] addSubview:markerDistance[i]];
-        
-        //出口・改札名のラベルを表示
-        markerName[i] = [[UILabel alloc] initWithFrame:CGRectMake(0,0,75*adjust,15)];
-        markerName[i].center = CGPointMake(75*adjust, 18);
-        markerName[i].text = [[latLonData objectAtIndex:i] objectAtIndex:0]; //データの一列目から名前を取得
-        markerName[i].textAlignment = UITextAlignmentCenter;
-        markerName[i].adjustsFontSizeToFitWidth = YES;
-        [markerView[i] addSubview:markerName[i]];
-    }
+    [self setHeader];
     
-    //YMKMapViewのインスタンスを作成
-    ymap = [[YMKMapView alloc] initWithFrame:CGRectMake(0, height/2, width, height/2-49) appid:@"dj0zaiZpPWowMElEclpUZU5yNyZzPWNvbnN1bWVyc2VjcmV0Jng9NGY-" ];
+    [self prepareBtn];
     
-    //地図のタイプを指定 標準の地図を指定
-//    ymap.mapType=YMKMapTypeStyle; //スタンダード
-//    ymap.mapType=YMKMapTypeHybrid; //地下街を表示
-    
-    NSMutableArray* ary=[NSMutableArray array];
-    [ary addObject:[NSString stringWithFormat:@"on:background"]]; //←なぜ機能してくれない！
-    [ymap setMapType:YMKMapTypeStyle MapStyle:@"standard" MapStyleParam:ary];
-    [self.view addSubview:ymap];
-    //YMKMapViewDelegateを登録
-    ymap.delegate = self;
-    ymap.showsUserLocation = YES;
-    //ヘッダー画像
-    UIImageView *headView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, 20)];
-    headView.image = [UIImage imageNamed:@"640-98.png"];
-    [self.view addSubview:headView];
-    
-    downBtnImg = [UIImage imageNamed:@"pullDownBtn.png"];
-    upBtnImg = [UIImage imageNamed:@"pullUpBtn.png"];
-
-    downBtn = [[UIButton alloc]
-               initWithFrame:CGRectMake(8*width/10, height/2-1, 56, 24)];
-    [downBtn setBackgroundImage:downBtnImg forState:UIControlStateNormal];
-    [downBtn addTarget:self action:@selector(downbtnTapped:)
-      forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:downBtn];
-
-    //現在地取得ボタン
-    nowPlaceBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    UIImage *nowPlaceImg = [UIImage imageNamed:@"nowLocation.png"];
-    [nowPlaceBtn setBackgroundImage:nowPlaceImg forState:UIControlStateNormal];
-    nowPlaceBtn.frame = CGRectMake(280, ymap.frame.size.height - 50, 68/2, 68/2);
-    [nowPlaceBtn addTarget:self action:@selector(setNowPlace) forControlEvents:UIControlEventTouchUpInside];
-    [ymap addSubview:nowPlaceBtn];
-    
-    //地下街ボタン
-    undergroundBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    UIImage *undergroundImg = [UIImage imageNamed:@"underGround.png"];
-    [undergroundBtn setBackgroundImage:undergroundImg forState:UIControlStateNormal];
-    undergroundBtn.frame = CGRectMake(280, ymap.frame.size.height - 90, 68/2, 68/2);
-    [undergroundBtn addTarget:self action:@selector(changeMapTypeToChika) forControlEvents:UIControlEventTouchUpInside];
-    //undergroundBtn.backgroundColor = [UIColor redColor];
-    undergroundBtn.alpha = 0.5;
-    [ymap addSubview:undergroundBtn];
-    
-    //アイコンの高さの調整用
-    iconAdjustHeight = 2;
-    //地下街の表示
-    chikaOrNot = NO;
     [self setAnnotation];
    }
 
 //ビューが読み込まれるたびに呼ばれる
 - (void)viewWillAppear:(BOOL)animated{
 
-//    NSLog(@"緯度:%f 経度:%f",nowLatitude,nowLongitude);
+    [self setUp];
     //　加速度センサを開始する
     [self startAccelerometer];
-    ud = [NSUserDefaults standardUserDefaults];
+    [self getConpassAndLocation];
+    [self setupAVCapture];
+    
+}
 
+-(void)setUp{
+    //アイコンの高さの調整用
+    iconAdjustHeight = 2;
+    ud = [NSUserDefaults standardUserDefaults];
+    isScaleBar = [ud boolForKey:@"KEY_C"];
+    [ud synchronize];
+    
+    if (isScaleBar == YES) {
+        ymap.scalebarVisible = YES;
+    }else{
+        ymap.scalebarVisible = NO;
+    }
+
+    //地下街の表示
+    chikaOrNot = NO;
+}
+-(void)getConpassAndLocation{
     // コンパスが使用可能かどうかチェックする
     if ([CLLocationManager headingAvailable]) {
         locationManager = [CLLocationManager new];
@@ -296,7 +191,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
         //nowLonLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 90, 100, 30)];
         //targetAzimuthLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 110, 100, 30)];
     }
-    
     //駅選択画面から読み込まれた場合、その駅の地点へ飛ぶ
     if (station) {
         loadNowLocation = false;
@@ -304,16 +198,6 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     }else {
         //タブバーから読み込まれた場合、現在地へ飛ぶ
         loadNowLocation = true;
-    }
-    
-    BOOL b = [ud boolForKey:@"KEY_C"];
-    
-    [ud synchronize];
-
-    if (b ==YES) {
-        ymap.scalebarVisible = YES;
-    }else{
-        ymap.scalebarVisible = NO;
     }
 
 }
@@ -323,6 +207,123 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     csvData = [NSData dataWithContentsOfFile:csvFile];
     csv = [[NSString alloc] initWithData:csvData encoding:NSUTF8StringEncoding];
     scanner = [NSScanner scannerWithString:csv];
+    
+    // 改行文字の集合を取得
+    NSCharacterSet *chSet = [NSCharacterSet newlineCharacterSet];
+    // 一行ずつの読み込み
+    NSString *line;
+    latLonData = [[NSMutableArray alloc] init];
+    
+    //タイトル行読み飛ばしフラグ。読み込む場合はtrueにする
+    bool titleUse = false;
+    while (![scanner isAtEnd]) {
+        // 一行読み込み
+        [scanner scanUpToCharactersFromSet:chSet intoString:&line];
+        if(titleUse){
+            // カンマ「,」で区切る
+            NSArray *array = [line componentsSeparatedByString:@","];
+            
+            //テスト(全体の緯度経度を移動)
+            //            float fLat = [[array objectAtIndex:1] floatValue];
+            //            float fLon = [[array objectAtIndex:2] floatValue];
+            ////            fLat = fLat - 0.060291; //佐野家と新宿駅の差
+            ////            fLon = fLon - 0.315887;
+            //            fLat = fLat - 0.029355; //日野キャンと新宿駅の差　35.661523　　139.367619　35.690921　　139.700258
+            //            fLon = fLon - 0.332639;
+            //            NSString *sLat = [NSString stringWithFormat:@"%f",fLat];
+            //            NSString *sLon = [NSString stringWithFormat:@"%f",fLon];
+            //            NSString *exitName = [array objectAtIndex:0];
+            //            NSArray *testArray = [NSArray arrayWithObjects:exitName,sLat,sLon, nil];
+            //            //配列に挿入する
+            //            [latLonData addObject:testArray];
+            
+            // 配列に挿入する
+            [latLonData addObject:array];
+            
+        }
+        //　改行文字をスキップ
+        [scanner scanCharactersFromSet:chSet intoString:NULL];
+        titleUse = true;
+    }
+    //    NSLog(@"csv:%@",latLonData);
+
+}
+
+-(void)prepareScreen{
+    sc = [UIScreen mainScreen];
+    width = self.view.frame.size.width;
+    height = self.view.frame.size.height;
+    //ステータスバー込みのサイズ
+    CGRect rect = sc.bounds;
+    sizeX = rect.size.width;
+    sizeY = rect.size.height;
+    
+    // プレビュー用のビューを生成
+    self.previewView = [[UIView alloc] initWithFrame:CGRectMake(0,0,width,height)];
+    [self.view addSubview:self.previewView];
+}
+
+-(void)setHeader{
+    //ヘッダー画像
+    UIImageView *headView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, 20)];
+    headView.image = [UIImage imageNamed:@"640-98.png"];
+    [self.view addSubview:headView];
+}
+
+-(void)setMarker{
+    //画像を選択
+    markerImage = [UIImage imageNamed:@"balloon300-150.png"];
+    //データの数を取得
+    allDataCount = [latLonData count];
+    //全てのマーカーをセット
+    for (int i = 0; i < allDataCount; i++) {
+        //サイズ調整用
+        float adjust = 0.8;
+        markerView[i] = [[UIImageView alloc]initWithImage:markerImage];
+        //画面の外に配置
+        markerView[i].frame = CGRectMake(width, height, 150*adjust, 75*adjust);
+        
+        markerX = markerImage.size.width;
+        markerY = markerImage.size.height;
+        //最初は非表示
+        markerView[i].hidden = YES;
+        
+        [self.view addSubview:markerView[i]];
+        //距離のラベルを作成
+        markerDistance[i] = [[UILabel alloc] initWithFrame:CGRectMake(0,0,75*adjust,15)];
+        markerDistance[i].center = CGPointMake(75*adjust, 38);
+        markerDistance[i].textAlignment = UITextAlignmentCenter;
+        markerDistance[i].font = [UIFont fontWithName:@"AppleGothic" size:12];
+        markerDistance[i].adjustsFontSizeToFitWidth = YES;
+        [markerView[i] addSubview:markerDistance[i]];
+        
+        //出口・改札名のラベルを表示
+        markerName[i] = [[UILabel alloc] initWithFrame:CGRectMake(0,0,75*adjust,15)];
+        markerName[i].center = CGPointMake(75*adjust, 18);
+        markerName[i].text = [[latLonData objectAtIndex:i] objectAtIndex:0]; //データの一列目から名前を取得
+        markerName[i].textAlignment = UITextAlignmentCenter;
+        markerName[i].adjustsFontSizeToFitWidth = YES;
+        [markerView[i] addSubview:markerName[i]];
+    }
+
+}
+
+-(void)setUpYmap{
+    //YMKMapViewのインスタンスを作成
+    ymap = [[YMKMapView alloc] initWithFrame:CGRectMake(0, height/2, width, height/2-49) appid:@"dj0zaiZpPWowMElEclpUZU5yNyZzPWNvbnN1bWVyc2VjcmV0Jng9NGY-" ];
+    
+    //地図のタイプを指定 標準の地図を指定
+    //    ymap.mapType=YMKMapTypeStyle; //スタンダード
+    //    ymap.mapType=YMKMapTypeHybrid; //地下街を表示
+    
+    NSMutableArray* ary=[NSMutableArray array];
+    [ary addObject:[NSString stringWithFormat:@"on:background"]]; //←なぜ機能してくれない！
+    [ymap setMapType:YMKMapTypeStyle MapStyle:@"standard" MapStyleParam:ary];
+    [self.view addSubview:ymap];
+    //YMKMapViewDelegateを登録
+    ymap.delegate = self;
+    ymap.showsUserLocation = YES;
+
     
 }
 //駅の位置へ移動
@@ -349,6 +350,36 @@ float CalculateAngle(float nLat1, float nLon1, float nLat2, float nLon2)
     ymap.region = YMKCoordinateRegionMake(center, YMKCoordinateSpanMake(0.005, 0.005));
 }
 
+-(void)prepareBtn{
+    downBtnImg = [UIImage imageNamed:@"pullDownBtn.png"];
+    upBtnImg = [UIImage imageNamed:@"pullUpBtn.png"];
+    
+    downBtn = [[UIButton alloc]
+               initWithFrame:CGRectMake(8*width/10, height/2-1, 56, 24)];
+    [downBtn setBackgroundImage:downBtnImg forState:UIControlStateNormal];
+    [downBtn addTarget:self action:@selector(downbtnTapped:)
+      forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:downBtn];
+    
+    //現在地取得ボタン
+    nowPlaceBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    UIImage *nowPlaceImg = [UIImage imageNamed:@"nowLocation.png"];
+    [nowPlaceBtn setBackgroundImage:nowPlaceImg forState:UIControlStateNormal];
+    nowPlaceBtn.frame = CGRectMake(280, ymap.frame.size.height - 50, 68/2, 68/2);
+    [nowPlaceBtn addTarget:self action:@selector(setNowPlace) forControlEvents:UIControlEventTouchUpInside];
+    [ymap addSubview:nowPlaceBtn];
+    
+    //地下街ボタン
+    undergroundBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    UIImage *undergroundImg = [UIImage imageNamed:@"underGround.png"];
+    [undergroundBtn setBackgroundImage:undergroundImg forState:UIControlStateNormal];
+    undergroundBtn.frame = CGRectMake(280, ymap.frame.size.height - 90, 68/2, 68/2);
+    [undergroundBtn addTarget:self action:@selector(changeMapTypeToChika) forControlEvents:UIControlEventTouchUpInside];
+    //undergroundBtn.backgroundColor = [UIColor redColor];
+    undergroundBtn.alpha = 0.5;
+    [ymap addSubview:undergroundBtn];
+
+}
 //地下街マップへの切り替え
 - (void)changeMapTypeToChika{
     if (chikaOrNot == NO) {
